@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>営業報告フォーム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c5cbf;
+    --green: #3ecf8e;
+    --text: #e8eaf6;
+    --text-muted: #7b82a8;
+    --error: #f06292;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,247,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(124,92,191,0.08) 0%, transparent 60%);
+  }
+  .container { width: 100%; max-width: 580px; }
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(79,142,247,0.12);
+    border: 1px solid rgba(79,142,247,0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+  .header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .header p { font-size: 13px; color: var(--text-muted); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    animation: fadeUp 0.6s ease 0.1s both;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* チャンネル選択 */
+  .channel-section {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .channel-section label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .channel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .channel-option { position: relative; }
+  .channel-option input[type="radio"] { display: none; }
+  .channel-option label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .channel-option input[type="radio"]:checked + label {
+    border-color: var(--green);
+    background: rgba(62,207,142,0.07);
+    color: var(--text);
+  }
+  .channel-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .channel-option input[type="radio"]:checked + label .channel-dot {
+    background: var(--green);
+  }
+
+  /* 事業区分タブ */
+  .biz-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .biz-tab {
+    padding: 14px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .biz-tab.active {
+    border-color: var(--accent);
+    background: rgba(79,142,247,0.1);
+    color: var(--text);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* 担当者管理 */
+  .staff-manager {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .staff-manager-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .staff-manager-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+  .staff-toggle {
+    font-size: 11px;
+    color: var(--accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .staff-toggle:hover { background: rgba(79,142,247,0.1); }
+  .staff-edit-area { display: none; }
+  .staff-edit-area.open { display: block; }
+  .staff-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    min-height: 32px;
+  }
+  .staff-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 10px 4px 12px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .staff-chip-del {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .staff-chip-del:hover { color: var(--error); }
+  .staff-add-row { display: flex; gap: 8px; margin-top: 8px; }
+  .staff-add-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .staff-add-input:focus { border-color: var(--accent); }
+  .staff-add-input::placeholder { color: #444966; }
+  .staff-add-btn {
+    padding: 8px 14px;
+    background: rgba(79,142,247,0.15);
+    border: 1px solid rgba(79,142,247,0.3);
+    border-radius: 8px;
+    color: var(--accent);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .staff-add-btn:hover { background: rgba(79,142,247,0.25); }
+
+  /* フィールド */
+  .field { margin-bottom: 18px; }
+  .field > label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .field .required {
+    font-size: 10px;
+    background: rgba(240,98,146,0.15);
+    color: var(--error);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field input[type="date"],
+  .field input[type="email"],
+  .field input[type="tel"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: #444966; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+  }
+  .field textarea { resize: vertical; min-height: 72px; }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237b82a8' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+  .field select option { background: #1a1d27; }
+
+  .input-prefix-wrap { position: relative; }
+  .input-prefix {
+    position: absolute; left: 16px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 15px; pointer-events: none;
+  }
+  .input-prefix-wrap input { padding-left: 32px; }
+  .input-suffix {
+    position: absolute; right: 16px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 13px; pointer-events: none;
+  }
+
+  /* ステータス */
+  .status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .status-option { position: relative; }
+  .status-option input[type="radio"] { display: none; }
+  .status-option label {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 12px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.2s;
+    font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 0;
+    text-transform: none; letter-spacing: normal;
+  }
+  .status-option input[type="radio"]:checked + label {
+    border-color: var(--accent); background: rgba(79,142,247,0.1); color: var(--text);
+  }
+
+  /* セクション */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* WEBコンサル動的項目 */
+  .dynamic-fields { margin-bottom: 8px; }
+  .dynamic-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+  }
+  .dynamic-field-inner { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .dynamic-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .dynamic-field input[type="text"],
+  .dynamic-field input[type="number"],
+  .dynamic-field input[type="date"],
+  .dynamic-field input[type="email"],
+  .dynamic-field input[type="tel"],
+  .dynamic-field select,
+  .dynamic-field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .dynamic-field input::placeholder, .dynamic-field textarea::placeholder { color: #444966; }
+  .dynamic-field input:focus, .dynamic-field select:focus, .dynamic-field textarea:focus {
+    border-color: var(--accent);
+  }
+  .dynamic-field textarea { resize: vertical; min-height: 60px; }
+  .dynamic-field-del {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 18px; line-height: 1; padding: 4px;
+    transition: color 0.2s; margin-top: 2px; flex-shrink: 0;
+  }
+  .dynamic-field-del:hover { color: var(--error); }
+
+  .add-field-section {
+    background: var(--surface2);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+  .add-field-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .add-field-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .add-field-input {
+    flex: 1;
+    min-width: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .add-field-input:focus { border-color: var(--accent); }
+  .add-field-input::placeholder { color: #444966; }
+  .add-field-type {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .add-field-btn {
+    padding: 8px 14px;
+    background: rgba(79,142,247,0.15);
+    border: 1px solid rgba(79,142,247,0.3);
+    border-radius: 8px;
+    color: var(--accent);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .add-field-btn:hover { background: rgba(79,142,247,0.25); }
+
+  /* プレビュー */
+  .preview-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .preview-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .slack-preview {
+    background: #1a1d27;
+    border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+  }
+  .preview-content {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--text);
+    white-space: pre-wrap; word-break: break-all;
+  }
+
+  /* 送信ボタン */
+  .submit-btn {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    border: none; border-radius: var(--radius);
+    color: white; font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.03em;
+  }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* トースト */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 24px; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--error); color: var(--error); }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+
+  /* 不動産専用：プレフィックス付き input */
+  #section-realestate .input-prefix-wrap input { padding-left: 32px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-badge">📋 営業管理</div>
+    <h1>契約・請求書 報告フォーム</h1>
+    <p>入力後、Slackへ自動投稿されます</p>
+  </div>
+
+  <div class="card">
+
+    <!-- チャンネル選択 -->
+    <div class="channel-section">
+      <label>📢 投稿先チャンネル</label>
+      <div class="channel-grid">
+        <div class="channel-option">
+          <input type="radio" name="channel" id="ch1" value="営業報告" checked onchange="updatePreview()">
+          <label for="ch1">
+            <span class="channel-dot"></span>
+            # 営業報告
+          </label>
+        </div>
+        <div class="channel-option">
+          <input type="radio" name="channel" id="ch2" value="不動産チーム" onchange="updatePreview()">
+          <label for="ch2">
+            <span class="channel-dot"></span>
+            # 不動産チーム
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 事業区分タブ -->
+    <div class="biz-tabs">
+      <button class="biz-tab active" onclick="switchBiz('realestate')">🏠 不動産</button>
+      <button class="biz-tab" onclick="switchBiz('webconsul')">💻 WEBコンサル</button>
+    </div>
+
+    <!-- 担当者 -->
+    <div class="staff-manager">
+      <div class="staff-manager-header">
+        <div class="staff-manager-title">👤 担当者</div>
+        <button class="staff-toggle" id="staffToggleBtn" onclick="toggleStaffEdit()">＋ 編集</button>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <select id="staffSelect" onchange="updatePreview()">
+          <option value="">担当者を選択してください</option>
+        </select>
+      </div>
+      <div class="staff-edit-area" id="staffEditArea">
+        <div style="height:10px"></div>
+        <div class="staff-chip-list" id="staffChipList"></div>
+        <div class="staff-add-row">
+          <input class="staff-add-input" id="staffInput" placeholder="名前を入力（例：田中 太郎）" onkeydown="if(event.key==='Enter')addStaff()">
+          <button class="staff-add-btn" onclick="addStaff()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">報告内容</div>
+
+    <!-- 不動産セクション -->
+    <div class="section active" id="section-realestate">
+      <div class="field">
+        <label>🧑‍💼 顧客名 <span class="required">必須</span></label>
+        <input type="text" id="re-customerName" placeholder="例：山田 花子 様" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>🏢 物件名 <span class="required">必須</span></label>
+        <input type="text" id="re-propertyName" placeholder="例：グランドメゾン渋谷 302号室" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>💴 賃料（月額） <span class="required">必須</span></label>
+        <div class="input-prefix-wrap">
+          <span class="input-prefix">¥</span>
+          <input type="number" id="re-rent" placeholder="120000" min="0" step="1000" oninput="updatePreview()">
+          <span class="input-suffix">円 / 月</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>📋 申し込みステータス <span class="required">必須</span></label>
+        <div class="status-grid">
+          <div class="status-option">
+            <input type="radio" name="re-status" id="re-s1" value="申し込み受付" checked onchange="updatePreview()">
+            <label for="re-s1">📝 申し込み受付</label>
+          </div>
+          <div class="status-option">
+            <input type="radio" name="re-status" id="re-s2" value="審査中" onchange="updatePreview()">
+            <label for="re-s2">🔍 審査中</label>
+          </div>
+          <div class="status-option">
+            <input type="radio" name="re-status" id="re-s3" value="審査通過" onchange="updatePreview()">
+            <label for="re-s3">✅ 審査通過</label>
+          </div>
+          <div class="status-option">
+            <input type="radio" name="re-status" id="re-s4" value="契約完了" onchange="updatePreview()">
+            <label for="re-s4">🎉 契約完了</label>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>📄 書類種別</label>
+        <select id="re-docType" onchange="updatePreview()">
+          <option value="契約書">契約書</option>
+          <option value="請求書">請求書</option>
+          <option value="契約書＋請求書">契約書＋請求書</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>📝 メモ・補足</label>
+        <textarea id="re-memo" placeholder="特記事項があればご記入ください（任意）" oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
+    <!-- WEBコンサルセクション -->
+    <div class="section" id="section-webconsul">
+      <!-- 固定フィールド群 -->
+      <div id="wc-fixed-fields">
+        <div class="field">
+          <label>🏢 契約名 / 法人名 <span class="required">必須</span></label>
+          <input type="text" id="wc-contractName" placeholder="例：医療法人社団〇〇会" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>👤 院長 / 代表者名</label>
+          <input type="text" id="wc-director" placeholder="例：田中 太郎" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>📍 所在地</label>
+          <input type="text" id="wc-address" placeholder="例：〒000-0000 東京都〇〇区〇〇" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>📞 電話番号</label>
+          <input type="tel" id="wc-tel" placeholder="例：03-0000-0000" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>✉️ メールアドレス</label>
+          <input type="email" id="wc-email" placeholder="例：info@example.com" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>📦 契約プラン <span class="required">必須</span></label>
+          <input type="text" id="wc-plan" placeholder="例：KajitsuAI" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>💴 契約金額 <span class="required">必須</span></label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">¥</span>
+            <input type="number" id="wc-amount" placeholder="275000" min="0" step="1000" oninput="updatePreview()">
+            <span class="input-suffix">円（税込）</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>🔄 契約内容（期間）</label>
+          <input type="text" id="wc-period" placeholder="例：6ヶ月" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>📅 契約日</label>
+          <input type="date" id="wc-contractDate" oninput="updatePreview()" onchange="updatePreview()">
+        </div>
+        <div class="field">
+          <label>🚀 契約開始日</label>
+          <input type="date" id="wc-startDate" oninput="updatePreview()" onchange="updatePreview()">
+        </div>
+        <div class="field">
+          <label>📝 納品記事数</label>
+          <div class="input-prefix-wrap">
+            <input type="number" id="wc-articles" placeholder="20" min="0" oninput="updatePreview()">
+            <span class="input-suffix">記事</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>⏰ 納期</label>
+          <div class="input-prefix-wrap">
+            <input type="number" id="wc-deadline" placeholder="20" min="0" oninput="updatePreview()">
+            <span class="input-suffix">日</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 動的追加フィールド -->
+      <div class="dynamic-fields" id="wc-dynamic-fields"></div>
+
+      <!-- 項目追加UI -->
+      <div class="add-field-section">
+        <div class="add-field-title">＋ 項目を追加</div>
+        <div class="add-field-row">
+          <input class="add-field-input" id="newFieldLabel" placeholder="項目名（例：担当営業）" onkeydown="if(event.key==='Enter')addDynamicField()">
+          <select class="add-field-type" id="newFieldType">
+            <option value="text">テキスト</option>
+            <option value="number">数値</option>
+            <option value="date">日付</option>
+            <option value="email">メール</option>
+            <option value="tel">電話</option>
+            <option value="textarea">長文</option>
+          </select>
+          <button class="add-field-btn" onclick="addDynamicField()">追加</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>📄 書類種別</label>
+        <select id="wc-docType" onchange="updatePreview()">
+          <option value="契約書">契約書</option>
+          <option value="請求書">請求書</option>
+          <option value="契約書＋請求書">契約書＋請求書</option>
+          <option value="見積書">見積書</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>📝 メモ・補足</label>
+        <textarea id="wc-memo" placeholder="特記事項があればご記入ください（任意）" oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
+    <!-- プレビュー -->
+    <div class="preview-box">
+      <div class="preview-label">👁 Slack 投稿プレビュー</div>
+      <div class="slack-preview">
+        <div class="preview-content" id="previewContent">入力するとプレビューが表示されます</div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="sendToSlack()">
+      Slackに投稿する 🚀
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Webhook設定（チャンネルごと） =====
+const CHANNELS = {
+  '営業報告':   'https://hooks.slack.com/services/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',
+  '不動産チーム': 'https://hooks.slack.com/services/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',
+};
+
+// ===== 事業区分 =====
+let currentBiz = 'realestate';
+
+// ===== 担当者管理 =====
+let staffList = JSON.parse(localStorage.getItem('sf_staff') || '[]');
+
+function saveStaff() { localStorage.setItem('sf_staff', JSON.stringify(staffList)); }
+
+function renderStaff() {
+  // チップ
+  const chipList = document.getElementById('staffChipList');
+  chipList.innerHTML = staffList.length
+    ? staffList.map((n, i) => `
+        <span class="staff-chip">
+          ${n}
+          <button class="staff-chip-del" onclick="deleteStaff(${i})">×</button>
+        </span>`).join('')
+    : '<span style="font-size:12px;color:var(--text-muted)">まだ登録されていません</span>';
+
+  // セレクト
+  const sel = document.getElementById('staffSelect');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">担当者を選択してください</option>' +
+    staffList.map(n => `<option value="${n}"${n===cur?' selected':''}>${n}</option>`).join('');
+  updatePreview();
+}
+
+function addStaff() {
+  const inp = document.getElementById('staffInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (staffList.includes(name)) { showToast('error','⚠️ 同じ名前が既に登録されています'); return; }
+  staffList.push(name);
+  saveStaff();
+  renderStaff();
+  document.getElementById('staffSelect').value = name;
+  inp.value = '';
+  updatePreview();
+}
+
+function deleteStaff(i) {
+  staffList.splice(i, 1);
+  saveStaff();
+  renderStaff();
+}
+
+function toggleStaffEdit() {
+  const area = document.getElementById('staffEditArea');
+  const btn  = document.getElementById('staffToggleBtn');
+  const open = area.classList.toggle('open');
+  btn.textContent = open ? '✕ 閉じる' : '＋ 編集';
+}
+
+renderStaff();
+
+// ===== 事業区分切替 =====
+function switchBiz(biz) {
+  currentBiz = biz;
+  document.querySelectorAll('.biz-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i===0 && biz==='realestate') || (i===1 && biz==='webconsul'));
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + biz).classList.add('active');
+  updatePreview();
+}
+
+// ===== 動的フィールド管理 =====
+let dynamicFields = [];
+let dfCounter = 0;
+
+function addDynamicField() {
+  const label = document.getElementById('newFieldLabel').value.trim();
+  const type  = document.getElementById('newFieldType').value;
+  if (!label) { showToast('error','⚠️ 項目名を入力してください'); return; }
+
+  const id = 'df_' + (++dfCounter);
+  dynamicFields.push({ id, label, type, value: '' });
+  renderDynamicFields();
+  document.getElementById('newFieldLabel').value = '';
+}
+
+function removeDynamicField(id) {
+  dynamicFields = dynamicFields.filter(f => f.id !== id);
+  renderDynamicFields();
+  updatePreview();
+}
+
+function renderDynamicFields() {
+  const container = document.getElementById('wc-dynamic-fields');
+  container.innerHTML = dynamicFields.map(f => {
+    let inputHtml;
+    if (f.type === 'textarea') {
+      inputHtml = `<textarea id="${f.id}" placeholder="入力してください" oninput="dfUpdate('${f.id}', this.value)">${f.value}</textarea>`;
+    } else {
+      inputHtml = `<input type="${f.type}" id="${f.id}" placeholder="入力してください" value="${f.value}" oninput="dfUpdate('${f.id}', this.value)" onchange="dfUpdate('${f.id}', this.value)">`;
+    }
+    return `
+      <div class="dynamic-field">
+        <div class="dynamic-field-inner">
+          <div class="dynamic-field-label">${f.label}</div>
+          ${inputHtml}
+        </div>
+        <button class="dynamic-field-del" onclick="removeDynamicField('${f.id}')">×</button>
+      </div>`;
+  }).join('');
+}
+
+function dfUpdate(id, value) {
+  const f = dynamicFields.find(f => f.id === id);
+  if (f) f.value = value;
+  updatePreview();
+}
+
+// ===== ユーティリティ =====
+function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function formatMoney(v) {
+  if (!v) return '—';
+  return '¥' + Number(v).toLocaleString('ja-JP');
+}
+
+function formatDate(v) {
+  if (!v) return '—';
+  const [y,m,d] = v.split('-');
+  return `${y}年${m}月${d}日`;
+}
+
+function getChannel() {
+  const el = document.querySelector('input[name="channel"]:checked');
+  return el ? el.value : '';
+}
+
+function nowStr() {
+  return new Date().toLocaleDateString('ja-JP', {
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit'
+  });
+}
+
+// ===== プレビュー生成 =====
+function buildText() {
+  const staff   = val('staffSelect') || '—';
+  const channel = getChannel();
+  const now     = nowStr();
+
+  if (currentBiz === 'realestate') {
+    const customer = val('re-customerName') || '—';
+    const property = val('re-propertyName') || '—';
+    const rent     = val('re-rent');
+    const status   = (document.querySelector('input[name="re-status"]:checked') || {}).value || '—';
+    const docType  = val('re-docType') || '—';
+    const memo     = val('re-memo');
+
+    let t = `【🏠 不動産 申し込み報告】${now}\n`;
+    t += `チャンネル：#${channel}\n`;
+    t += `━━━━━━━━━━━━━━━━\n`;
+    t += `担当者　：${staff}\n`;
+    t += `顧客名　：${customer}\n`;
+    t += `物件名　：${property}\n`;
+    t += `賃料　　：${formatMoney(rent)} / 月\n`;
+    t += `ステータス：${status}\n`;
+    t += `書類種別：${docType}`;
+    if (memo) t += `\nメモ　　：${memo}`;
+    return t;
+
+  } else {
+    const contractName = val('wc-contractName') || '—';
+    const director     = val('wc-director');
+    const address      = val('wc-address');
+    const tel          = val('wc-tel');
+    const email        = val('wc-email');
+    const plan         = val('wc-plan') || '—';
+    const amount       = val('wc-amount');
+    const period       = val('wc-period');
+    const contractDate = val('wc-contractDate');
+    const startDate    = val('wc-startDate');
+    const articles     = val('wc-articles');
+    const deadline     = val('wc-deadline');
+    const docType      = val('wc-docType') || '—';
+    const memo         = val('wc-memo');
+
+    let t = `【💻 WEBコンサル 契約報告】${now}\n`;
+    t += `チャンネル：#${channel}\n`;
+    t += `━━━━━━━━━━━━━━━━\n`;
+    t += `担当者　　：${staff}\n`;
+    t += `契約名　　：${contractName}\n`;
+    if (director) t += `代表者　　：${director}\n`;
+    if (address)  t += `所在地　　：${address}\n`;
+    if (tel)      t += `電話番号　：${tel}\n`;
+    if (email)    t += `メール　　：${email}\n`;
+    t += `契約プラン：${plan}\n`;
+    t += `契約金額　：${formatMoney(amount)}円（税込）\n`;
+    if (period)       t += `契約内容　：${period}\n`;
+    if (contractDate) t += `契約日　　：${formatDate(contractDate)}\n`;
+    if (startDate)    t += `開始日　　：${formatDate(startDate)}\n`;
+    if (articles)     t += `納品記事数：${articles}記事\n`;
+    if (deadline)     t += `納期　　　：${deadline}日\n`;
+    t += `書類種別　：${docType}`;
+
+    // 動的フィールド
+    dynamicFields.forEach(f => {
+      if (f.value) {
+        const v = f.type === 'date' ? formatDate(f.value) : f.value;
+        t += `\n${f.label.padEnd(4,'　')}：${v}`;
+      }
+    });
+
+    if (memo) t += `\nメモ　　　：${memo}`;
+    return t;
+  }
+}
+
+function updatePreview() {
+  document.getElementById('previewContent').textContent = buildText();
+}
+
+updatePreview();
+
+// ===== Slack送信 =====
+async function sendToSlack() {
+  const channel = getChannel();
+  const staff   = val('staffSelect');
+  const webhook = CHANNELS[channel];
+
+  if (!staff) return showToast('error','⚠️ 担当者を選択してください');
+
+  if (currentBiz === 'realestate') {
+    if (!val('re-customerName')) return showToast('error','⚠️ 顧客名を入力してください');
+    if (!val('re-propertyName')) return showToast('error','⚠️ 物件名を入力してください');
+    if (!val('re-rent'))         return showToast('error','⚠️ 賃料を入力してください');
+  } else {
+    if (!val('wc-contractName')) return showToast('error','⚠️ 契約名 / 法人名を入力してください');
+    if (!val('wc-plan'))         return showToast('error','⚠️ 契約プランを入力してください');
+    if (!val('wc-amount'))       return showToast('error','⚠️ 契約金額を入力してください');
+  }
+
+  const text = buildText();
+  const btn  = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>投稿中...';
+
+  try {
+    await fetch(webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+      mode: 'no-cors'
+    });
+    showToast('success','✅ Slackへの投稿が完了しました！');
+    resetForm();
+  } catch(e) {
+    showToast('error','❌ 投稿エラー：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Slackに投稿する 🚀';
+  }
+}
+
+function resetForm() {
+  setTimeout(() => {
+    ['re-customerName','re-propertyName','re-rent','re-memo',
+     'wc-contractName','wc-director','wc-address','wc-tel','wc-email',
+     'wc-plan','wc-amount','wc-period','wc-contractDate','wc-startDate',
+     'wc-articles','wc-deadline','wc-memo'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('re-s1').checked = true;
+    // 動的フィールドはリセットしない（再利用のため）
+    updatePreview();
+  }, 1000);
+}
+
+function showToast(type, msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
